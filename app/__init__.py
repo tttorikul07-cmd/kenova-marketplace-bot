@@ -1,0 +1,1 @@
+"""KENOVA SHOP application package."""

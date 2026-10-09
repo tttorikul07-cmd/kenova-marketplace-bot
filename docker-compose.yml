@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: kenova
+      POSTGRES_USER: kenova
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - kenova_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kenova -d kenova"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  bot:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://kenova:${POSTGRES_PASSWORD}@db:5432/kenova
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+volumes:
+  kenova_pgdata:
